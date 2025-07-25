@@ -22,10 +22,24 @@ html,
 body,
 #root,
 #app {
-  /* height: 100%; */
+  height: 100%;
   background-color: var(--tt-bg-color);
 }
 
+/* Скрываем скроллбар для редактора, но оставляем функциональность */
+.simple-editor-content .tiptap.ProseMirror.simple-editor {
+  /* Для WebKit браузеров */
+  &::-webkit-scrollbar {
+    width: 0;
+    background: transparent;
+  }
+  
+  /* Для Firefox */
+  scrollbar-width: none;
+  -ms-overflow-style: none; /* IE и Edge */
+}
+
+/* Общие стили скроллбара для остальных элементов */
 ::-webkit-scrollbar {
   width: 0.25rem;
 }
@@ -51,25 +65,57 @@ body,
 .simple-editor-wrapper {
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
 .simple-editor-content {
-  max-width: 648px;
+  max-width: 720px;
   width: 100%;
   margin: 0 auto;
   height: 100%;
   display: flex;
   flex-direction: column;
   flex: 1;
+  overflow: hidden;
+  padding: 0 2rem;
 }
 
 .simple-editor-content .tiptap.ProseMirror.simple-editor {
   flex: 1;
-  padding: 3rem 3rem;
+  padding: 3rem 0;
+  overflow-y: auto;
+  outline: none;
+  border: none;
+}
+
+/* Адаптивные отступы */
+@media screen and (max-width: 1024px) {
+  .simple-editor-content {
+    max-width: 100%;
+    padding: 0 1.5rem;
+  }
+  
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 2rem 0;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .simple-editor-content {
+    padding: 0 1rem;
+  }
+  
+  .simple-editor-content .tiptap.ProseMirror.simple-editor {
+    padding: 1.5rem 0;
+  }
 }
 
 @media screen and (max-width: 480px) {
+  .simple-editor-content {
+    padding: 0 0.75rem;
+  }
+  
   .simple-editor-content .tiptap.ProseMirror.simple-editor {
-    padding: 1rem 1.5rem;
+    padding: 1rem 0;
   }
 }

@@ -1,0 +1,263 @@
+/* Общие переменные и базовые стили */
+.document-selector {
+	margin-bottom: 16px;
+}
+
+.document-selector-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 12px;
+}
+
+.document-selector-header h3 {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: var(--tt-theme-text, #222);
+	transition: color 0.2s;
+}
+
+/* Кнопки: базовые стили */
+.create-doc-button,
+.create-first-doc-button,
+.edit-doc-button,
+.delete-doc-button,
+.save-edit-button,
+.cancel-edit-button {
+	background: var(--tt-button-default-bg-color, transparent);
+	color: var(--tt-button-default-text-color, var(--tt-gray-light-a-600));
+	border: none;
+	border-radius: var(--tt-radius-md, 8px);
+	padding: 6px 12px;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: background 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1), color 0.18s cubic-bezier(.4,0,.2,1);
+	font-size: 13px;
+	outline: none;
+}
+
+.edit-doc-button,
+.delete-doc-button,
+.save-edit-button,
+.cancel-edit-button {
+	padding: 4px;
+	border-radius: var(--tt-radius-xs, 4px);
+	font-size: 13px;
+}
+
+.edit-doc-button,
+.delete-doc-button,
+.save-edit-button,
+.cancel-edit-button {
+	color: var(--tt-gray-light-a-600, #6b7280);
+}
+
+.create-doc-button:hover,
+.create-first-doc-button:hover,
+.edit-doc-button:hover,
+.delete-doc-button:hover,
+.save-edit-button:hover,
+.cancel-edit-button:hover {
+	background: var(--tt-button-hover-bg-color, var(--tt-gray-light-200));
+	color: var(--tt-button-default-text-color, var(--tt-gray-light-a-600));
+	box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+}
+
+.create-doc-button:active,
+.create-first-doc-button:active,
+.edit-doc-button:active,
+.delete-doc-button:active,
+.save-edit-button:active,
+.cancel-edit-button:active {
+	background: var(--tt-button-hover-bg-color, var(--tt-gray-light-300));
+	box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
+}
+
+.documents-list {
+	max-height: 250px;
+	overflow-y: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--tt-scrollbar-color, #e5e7eb) transparent;
+}
+
+.documents-list::-webkit-scrollbar {
+	width: 6px;
+}
+.documents-list::-webkit-scrollbar-track {
+	background: transparent;
+}
+.documents-list::-webkit-scrollbar-thumb {
+	background: var(--tt-scrollbar-color, #e5e7eb);
+	border-radius: 3px;
+}
+
+.document-item {
+	background: var(--tt-bg-color, #fff);
+	border: 1px solid var(--tt-border-color, #e5e7eb);
+	border-radius: var(--tt-radius-md, 8px);
+	padding: 8px;
+	margin-bottom: 6px;
+	transition: border 0.18s cubic-bezier(.4,0,.2,1), background 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1);
+	cursor: pointer;
+	box-shadow: none;
+}
+.document-item:hover {
+	border-color: var(--tt-gray-light-400, #a6a7ab);
+	background: var(--tt-gray-light-100, #f8f8fa);
+	box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+	opacity: 1;
+}
+.document-item.active {
+	border-color: var(--tt-gray-light-600, #53565a);
+	background: var(--tt-gray-light-100, #f4f4f5);
+	box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
+}
+
+.document-content {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 4px;
+}
+
+.document-title {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--tt-theme-text, #222);
+	flex: 1;
+	cursor: pointer;
+	padding: 2px 4px;
+	border-radius: var(--tt-radius-xs, 4px);
+	transition: background 0.18s cubic-bezier(.4,0,.2,1);
+}
+.document-item.active .document-title {
+	color: var(--tt-gray-light-900, #222);
+}
+
+.document-actions {
+	display: flex;
+	gap: 4px;
+	opacity: 0;
+	transition: opacity 0.18s cubic-bezier(.4,0,.2,1);
+}
+.document-item:hover .document-actions {
+	opacity: 1;
+}
+
+.document-date {
+	font-size: 10px;
+	color: var(--tt-gray-light-400, #a6a7ab);
+	text-align: right;
+	transition: color 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.document-edit {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+
+.document-title-input {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--tt-theme-text, #222);
+	flex: 1;
+	cursor: pointer;
+	padding: 2px 4px;
+	border-radius: var(--tt-radius-xs, 4px);
+	transition: background 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.edit-actions {
+	display: flex;
+	gap: 4px;
+}
+
+.empty-documents {
+	text-align: center;
+	padding: 20px;
+	color: var(--tt-gray-light-400, #a6a7ab);
+}
+.empty-documents p {
+	margin: 0 0 12px 0;
+	font-size: 13px;
+}
+
+/* Темная тема: только отличия */
+.dark .document-selector {
+	border-bottom-color: var(--tt-border-color, #232222);
+}
+.dark .document-selector-header h3 {
+	color: var(--tt-theme-text, #f5f5f5);
+}
+.dark .create-doc-button,
+.dark .create-first-doc-button,
+.dark .edit-doc-button,
+.dark .delete-doc-button,
+.dark .save-edit-button,
+.dark .cancel-edit-button {
+	color: var(--tt-button-default-text-color, var(--tt-gray-dark-a-600));
+}
+.dark .create-doc-button:hover,
+.dark .create-first-doc-button:hover,
+.dark .edit-doc-button:hover,
+.dark .delete-doc-button:hover,
+.dark .save-edit-button:hover,
+.dark .cancel-edit-button:hover {
+	background: var(--tt-button-hover-bg-color, var(--tt-gray-dark-200));
+	color: var(--tt-button-default-text-color, var(--tt-gray-dark-a-600));
+	box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+}
+.dark .create-doc-button:active,
+.dark .create-first-doc-button:active,
+.dark .edit-doc-button:active,
+.dark .delete-doc-button:active,
+.dark .save-edit-button:active,
+.dark .cancel-edit-button:active {
+	background: var(--tt-button-hover-bg-color, var(--tt-gray-dark-300));
+	box-shadow: 0 1px 6px 0 rgba(0,0,0,0.16);
+}
+.dark .document-item {
+	background: var(--tt-bg-color, #1a1a1a);
+	border-color: var(--tt-border-color, #232222);
+	box-shadow: none;
+}
+.dark .document-item:hover {
+	border-color: var(--tt-gray-dark-400, #636369);
+	background: var(--tt-gray-dark-100, #232325);
+	box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+}
+.dark .document-item.active {
+	border-color: var(--tt-gray-dark-600, #a3a3a8);
+	background: var(--tt-gray-dark-100, #202022);
+	box-shadow: 0 2px 8px 0 rgba(0,0,0,0.18);
+}
+.dark .document-title {
+	color: var(--tt-theme-text, #f5f5f5);
+}
+.dark .document-item.active .document-title {
+	color: var(--tt-gray-dark-900, #f5f5f5);
+}
+.dark .document-date {
+	color: var(--tt-gray-dark-400, #636369);
+}
+.dark .document-title-input {
+	background: var(--tt-bg-color, #232222);
+	border-color: var(--tt-border-color, #232222);
+	color: var(--tt-theme-text, #f5f5f5);
+}
+.dark .document-title-input:focus {
+	box-shadow: 0 0 0 2px var(--tt-gray-dark-a-200, rgba(238,238,246,0.11));
+	border-color: var(--tt-gray-dark-400, #636369);
+}
+.dark .document-title-input:hover {
+	box-shadow: 0 0 0 1px var(--tt-gray-dark-a-200, rgba(238,238,246,0.07));
+	border-color: var(--tt-gray-dark-300, #a3a3a8);
+}
+.dark .empty-documents {
+	color: var(--tt-gray-dark-400, #636369);
+}

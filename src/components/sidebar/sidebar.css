@@ -1,0 +1,254 @@
+/* Общие стили */
+.sidebar-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Заголовок блоков */
+.blocks-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.blocks-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--tt-theme-text, #222);
+  transition: color 0.2s;
+}
+
+/* Кнопки: базовые стили */
+.create-block-button,
+.edit-block-button,
+.delete-block-button,
+.save-edit-button,
+.cancel-edit-button {
+  background: var(--tt-button-default-bg-color, transparent);
+  color: var(--tt-button-default-text-color, var(--tt-gray-light-a-600));
+  border: none;
+  border-radius: var(--tt-radius-md, 8px);
+  padding: 6px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1), color 0.18s cubic-bezier(.4,0,.2,1);
+  font-size: 13px;
+  outline: none;
+}
+
+.edit-block-button,
+.delete-block-button,
+.save-edit-button,
+.cancel-edit-button {
+  padding: 4px;
+  border-radius: var(--tt-radius-xs, 4px);
+  font-size: 13px;
+}
+
+.edit-block-button,
+.delete-block-button,
+.save-edit-button,
+.cancel-edit-button {
+  color: var(--tt-gray-light-a-600, #6b7280);
+}
+
+.create-block-button:hover:not(:disabled),
+.edit-block-button:hover,
+.delete-block-button:hover,
+.save-edit-button:hover,
+.cancel-edit-button:hover {
+  background: var(--tt-button-hover-bg-color, var(--tt-gray-light-200));
+  color: var(--tt-button-default-text-color, var(--tt-gray-light-a-600));
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.04);
+}
+
+.create-block-button:active,
+.edit-block-button:active,
+.delete-block-button:active,
+.save-edit-button:active,
+.cancel-edit-button:active {
+  background: var(--tt-button-hover-bg-color, var(--tt-gray-light-300));
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.08);
+}
+
+.create-block-button:disabled {
+  background: var(--tt-button-default-bg-color, transparent);
+  color: var(--tt-text-muted, #9ca3af);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Список блоков */
+.blocks-list {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--tt-scrollbar-color, #e5e7eb) transparent;
+}
+
+.blocks-list::-webkit-scrollbar {
+  width: 6px;
+}
+.blocks-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.blocks-list::-webkit-scrollbar-thumb {
+  background: var(--tt-scrollbar-color, #e5e7eb);
+  border-radius: 3px;
+}
+
+/* Блок */
+.block-item {
+  background: var(--tt-bg-color, #fff);
+  border: 1px solid var(--tt-border-color, #e5e7eb);
+  border-radius: var(--tt-radius-md, 8px);
+  padding: 8px;
+  margin-bottom: 6px;
+  transition: border 0.18s cubic-bezier(.4,0,.2,1), background 0.18s cubic-bezier(.4,0,.2,1), box-shadow 0.18s cubic-bezier(.4,0,.2,1);
+  cursor: pointer;
+  box-shadow: none;
+}
+.block-item:hover {
+  border-color: var(--tt-gray-light-400, #a6a7ab);
+  background: var(--tt-gray-light-100, #f8f8fa);
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.03);
+  opacity: 1;
+}
+
+.block-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.block-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--tt-theme-text, #222);
+  flex: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: var(--tt-radius-xs, 4px);
+  transition: background 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.block-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.18s cubic-bezier(.4,0,.2,1);
+}
+.block-item:hover .block-actions {
+  opacity: 1;
+}
+
+.block-date {
+  font-size: 10px;
+  color: var(--tt-gray-light-400, #a6a7ab);
+  text-align: right;
+  transition: color 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.block-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.block-title-input {
+	font-size: 13px;
+	font-weight: 500;
+	color: var(--tt-theme-text, #222);
+	flex: 1;
+	cursor: pointer;
+	padding: 2px 4px;
+	border-radius: var(--tt-radius-xs, 4px);
+	transition: background 0.18s cubic-bezier(.4,0,.2,1);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 4px;
+}
+
+/* Темная тема */
+.dark .blocks-header h3 {
+  color: var(--tt-theme-text, #f5f5f5);
+}
+
+.dark .create-block-button,
+.dark .edit-block-button,
+.dark .delete-block-button,
+.dark .save-edit-button,
+.dark .cancel-edit-button {
+  color: var(--tt-button-default-text-color, var(--tt-gray-dark-a-600));
+}
+
+.dark .create-block-button:hover:not(:disabled),
+.dark .edit-block-button:hover,
+.dark .delete-block-button:hover,
+.dark .save-edit-button:hover,
+.dark .cancel-edit-button:hover {
+  background: var(--tt-button-hover-bg-color, var(--tt-gray-dark-200));
+  color: var(--tt-button-default-text-color, var(--tt-gray-dark-a-600));
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+}
+
+.dark .create-block-button:active,
+.dark .edit-block-button:active,
+.dark .delete-block-button:active,
+.dark .save-edit-button:active,
+.dark .cancel-edit-button:active {
+  background: var(--tt-button-hover-bg-color, var(--tt-gray-dark-300));
+  box-shadow: 0 1px 6px 0 rgba(0,0,0,0.16);
+}
+
+.dark .create-block-button:disabled {
+  background: var(--tt-button-default-bg-color, transparent);
+  color: var(--tt-text-muted, #636369);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.dark .block-item {
+  background: var(--tt-bg-color, #1a1a1a);
+  border-color: var(--tt-border-color, #232222);
+  box-shadow: none;
+}
+
+.dark .block-item:hover {
+  border-color: var(--tt-gray-dark-400, #636369);
+  background: var(--tt-gray-dark-100, #232325);
+  box-shadow: 0 1px 4px 0 rgba(0,0,0,0.10);
+}
+
+.dark .block-title {
+  color: var(--tt-theme-text, #f5f5f5);
+}
+
+.dark .block-date {
+  color: var(--tt-gray-dark-400, #636369);
+}
+
+.dark .block-title-input {
+  background: var(--tt-bg-color, #232222);
+  border-color: var(--tt-border-color, #232222);
+  color: var(--tt-theme-text, #f5f5f5);
+}
+
+.dark .block-title-input:focus {
+  box-shadow: 0 0 0 2px var(--tt-gray-dark-a-200, rgba(238,238,246,0.11));
+  border-color: var(--tt-gray-dark-400, #636369);
+}
+
+.dark .block-title-input:hover {
+  box-shadow: 0 0 0 1px var(--tt-gray-dark-a-200, rgba(238,238,246,0.07));
+  border-color: var(--tt-gray-dark-300, #a3a3a8);
+}

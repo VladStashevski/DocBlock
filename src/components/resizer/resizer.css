@@ -1,0 +1,43 @@
+.resizer {
+  width: 4px;
+  background: transparent;
+  cursor: col-resize;
+  position: relative;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+.resizer:hover {
+  background-color: var(--tt-border-color, #e5e7eb);
+}
+
+.resizer:active {
+  background-color: var(--tt-primary-color, #3b82f6);
+}
+
+/* Увеличиваем область для клика */
+.resizer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -2px;
+  right: -2px;
+  bottom: 0;
+  background: transparent;
+}
+
+/* Темная тема */
+.dark .resizer:hover {
+  background-color: var(--tt-border-color, #374151);
+}
+
+.dark .resizer:active {
+  background-color: var(--tt-primary-color, #60a5fa);
+}
+
+/* Скрываем ресайзер на мобильных устройствах */
+@media screen and (max-width: 768px) {
+  .resizer {
+    display: none;
+  }
+}

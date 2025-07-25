@@ -1,6 +1,100 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
+  height: 100vh;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+}
+
+.editor-container {
+  flex: 1;
+  min-width: 0; /* Позволяет контейнеру сжиматься */
+  display: flex;
+  flex-direction: column;
+  order: 1;
+}
+
+.sidebar {
+  background-color: var(--tt-bg-color, #ffffff);
+  border-left: 1px solid var(--tt-border-color, #e5e7eb);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  order: 3;
+}
+
+.resizer {
+  order: 2;
+}
+
+.sidebar-content {
+  padding: 1.5rem;
+  flex: 1;
+  overflow-y: auto;
+  /* Скрываем скроллбар для боковой панели */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 0;
+  background: transparent;
+}
+
+.sidebar h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--tt-theme-text, #374151);
+}
+
+.sidebar p {
+  margin: 0;
+  color: var(--tt-theme-text, #6b7280);
+  font-size: 0.875rem;
+}
+
+/* Темная тема для боковой панели */
+.dark .sidebar {
+  background-color: var(--tt-bg-color, #1f2937);
+  border-left-color: var(--tt-border-color, #374151);
+}
+
+/* Адаптивность для мобильных устройств */
+@media screen and (max-width: 768px) {
+  .app-layout {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100% !important; /* Принудительно устанавливаем ширину на мобильных */
+    height: 250px;
+    border-left: none;
+    border-top: 1px solid var(--tt-border-color, #e5e7eb);
+    order: 2; /* Боковая панель внизу */
+  }
+  
+  .editor-container {
+    order: 1; /* Редактор сверху */
+  }
+  
+  .dark .sidebar {
+    border-top-color: var(--tt-border-color, #374151);
+  }
+}
+
+/* Очень маленькие экраны */
+@media screen and (max-width: 480px) {
+  .sidebar {
+    height: 200px !important;
+  }
+  
+  .sidebar-content {
+    padding: 1rem;
+  }
 }
 
 .logo {
