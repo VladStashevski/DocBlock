@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { Document } from '@/types/document'
 import type { TextBlock } from '@/types/text-block'
 import { DocumentSelector } from '../document-selector/document-selector'
@@ -14,10 +14,11 @@ interface SidebarProps {
   onEditBlock: (block: SidebarBlock) => void
   activeDocument: Document | null
   documents: Document[]
-  onSelectDocument: (document: Document) => void
+  onSelectDocument: (document: Document, shouldFocus?: boolean) => void
   onCreateDocument: () => void
   onDeleteDocument: (id: string) => void
   onRenameDocument: (id: string, newTitle: string) => void
+  editingBlock: SidebarBlock | null
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -31,33 +32,154 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectDocument,
   onCreateDocument,
   onDeleteDocument,
-  onRenameDocument
+  onRenameDocument,
+  editingBlock
 }) => {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editTitle, setEditTitle] = useState('')
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [clickedId, setClickedId] = useState<string | null>(null)
+  const [hoveredActiveId, setHoveredActiveId] = useState<string | null>(null)
 
-  const handleStartEdit = (block: SidebarBlock) => {
+  const handleStartEdit = useCallback((block: SidebarBlock) => {
     setEditingId(block.id)
     setEditTitle(block.title)
-  }
+  }, [])
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = useCallback(() => {
     if (editingId && editTitle.trim()) {
       onRenameBlock(editingId, editTitle.trim())
     }
     setEditingId(null)
     setEditTitle('')
-  }
+  }, [editingId, editTitle, onRenameBlock])
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingId(null)
     setEditTitle('')
-  }
+  }, [])
 
-  const handleDelete = (block: SidebarBlock) => {
+  const handleDelete = useCallback((block: SidebarBlock) => {
     if (window.confirm(`Вы уверены, что хотите удалить блок "${block.title}"?`)) {
       onDeleteBlock(block.id)
+    }
+  }, [onDeleteBlock])
+
+  const handleBlockClick = useCallback((block: SidebarBlock, e: React.MouseEvent) => {
+    if (
+      e.target instanceof HTMLElement &&
+      (e.target.closest('.block-actions') || e.target.closest('.block-title-input'))
+    ) {
+      return
+    }
+
+    setClickedId(block.id)
+    // Добавляем небольшую задержку для визуальной обратной связи
+    setTimeout(() => {
+      onEditBlock(block)
+      setClickedId(null)
+    }, 100)
+  }, [onEditBlock])
+
+  const handleDragStart = (block: SidebarBlock, e: React.DragEvent) => {
+    try {
+      // Сбрасываем состояние редактирования
+      setEditingId(null)
+      setEditTitle('')
+
+      // Очищаем контент от HTML тегов перед сохранением
+      const tempDiv = document.createElement('div')
+      tempDiv.innerHTML = block.content || ''
+      const cleanContent = tempDiv.textContent || tempDiv.innerText || ''
+
+      const cleanBlock = {
+        ...block,
+        content: cleanContent
+      }
+
+      e.dataTransfer.setData('application/json', JSON.stringify(cleanBlock))
+      e.dataTransfer.effectAllowed = 'copy'
+
+      // Создаем элемент для отображения при перетаскивании
+      const dragElement = document.createElement('div')
+      dragElement.className = 'block-item drag-element'
+      dragElement.style.width = '280px'
+      dragElement.style.background = 'var(--tt-bg-color, #fff)'
+      dragElement.style.border = '1px solid var(--tt-border-color, #e5e7eb)'
+      dragElement.style.borderRadius = 'var(--tt-radius-md, 8px)'
+      dragElement.style.padding = '12px'
+      dragElement.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+      dragElement.style.position = 'absolute'
+      dragElement.style.top = '-1000px' // Скрываем элемент за пределами экрана
+      dragElement.style.opacity = '0.95'
+      dragElement.style.pointerEvents = 'none' // Предотвращаем взаимодействие с элементом
+      dragElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease'
+      
+      // Добавляем эффект сжатия если блок активен и на него наводят
+      if (editingBlock?.id === block.id && hoveredActiveId === block.id) {
+        dragElement.style.transform = 'scale(0.85)'
+        dragElement.style.opacity = '0.8'
+      }
+
+      const header = document.createElement('div')
+      header.style.display = 'flex'
+      header.style.alignItems = 'center'
+      header.style.marginBottom = '8px'
+      header.style.gap = '8px'
+
+      const title = document.createElement('div')
+      title.textContent = block.title
+      title.style.fontWeight = '600'
+      title.style.fontSize = '14px'
+      title.style.color = 'var(--tt-gray-dark-800, #2c2e33)'
+      title.style.flex = '1'
+      title.style.paddingLeft = '30px'
+      header.appendChild(title)
+
+      const content = document.createElement('div')
+      content.textContent = cleanContent?.slice(0, 120) + (cleanContent && cleanContent.length > 120 ? '...' : '')
+      content.style.fontSize = '13px'
+      content.style.color = 'var(--tt-gray-dark-600, #676b73)'
+      content.style.lineHeight = '1.4'
+      content.style.maxHeight = '3.2em'
+      content.style.overflow = 'hidden'
+      content.style.display = '-webkit-box'
+      content.style.webkitLineClamp = '2'
+      content.style.webkitBoxOrient = 'vertical'
+      content.style.paddingLeft = '30px'
+
+      dragElement.appendChild(header)
+      dragElement.appendChild(content)
+
+      document.body.appendChild(dragElement)
+      e.dataTransfer.setDragImage(dragElement, 20, 20)
+
+      // Удаляем элемент после начала перетаскивания
+      requestAnimationFrame(() => {
+        if (dragElement.parentNode) {
+          document.body.removeChild(dragElement)
+        }
+      })
+
+      // Добавляем класс для визуальной обратной связи
+      const blockElement = e.currentTarget as HTMLElement
+      blockElement.classList.add('dragging')
+    } catch (error) {
+      console.error('Error starting drag:', error)
+    }
+  }
+
+  const handleDragEnd = (e: React.DragEvent) => {
+    try {
+      // Сбрасываем состояние редактирования
+      setEditingId(null)
+      setEditTitle('')
+
+      // Удаляем класс для визуальной обратной связи
+      const blockElement = e.currentTarget as HTMLElement
+      blockElement.classList.remove('dragging')
+    } catch (error) {
+      console.error('Error ending drag:', error)
     }
   }
 
@@ -93,25 +215,29 @@ export const Sidebar: React.FC<SidebarProps> = ({
           documentBlocks.map(block => (
             <div
               key={block.id}
-              className="block-item"
-              onClick={(e) => {
-                if (
-                  e.target instanceof HTMLElement &&
-                  (e.target.closest('.block-actions') || e.target.closest('.block-title-input'))
-                ) {
-                  return
-                }
-                onEditBlock(block)
-              }}
+              className={`block-item ${editingBlock?.id === block.id ? 'active' : ''} ${clickedId === block.id ? 'clicking' : ''}`}
+              onClick={(e) => handleBlockClick(block, e)}
               role="button"
               tabIndex={0}
+              draggable={editingId !== block.id}
+              onDragStart={(e) => handleDragStart(block, e)}
+              onDragEnd={handleDragEnd}
               onKeyDown={(e) => {
                 if ((e.key === 'Enter' || e.key === ' ') && editingId !== block.id) {
-                  onEditBlock(block)
+                  e.preventDefault()
+                  handleBlockClick(block, e as any)
                 }
               }}
-              onMouseEnter={() => setHoveredId(block.id)}
-              onMouseLeave={() => setHoveredId(null)}
+              onMouseEnter={() => {
+                setHoveredId(block.id)
+                if (editingBlock?.id === block.id) {
+                  setHoveredActiveId(block.id)
+                }
+              }}
+              onMouseLeave={() => {
+                setHoveredId(null)
+                setHoveredActiveId(null)
+              }}
             >
               {editingId === block.id ? (
                 <div className="block-edit">

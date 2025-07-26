@@ -116,6 +116,11 @@
 	box-shadow: 0 2px 8px 0 rgba(0,0,0,0.06);
 }
 
+.document-item.clicking {
+	transform: scale(0.98);
+	transition: transform 0.1s ease;
+}
+
 .document-content {
 	display: flex;
 	justify-content: space-between;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 import { Resizer } from '@/components/resizer/resizer'
 import { Sidebar } from '@/components/sidebar/sidebar'
@@ -55,6 +55,7 @@ function App() {
 
   const [currentContent, setCurrentContent] = useState('')
   const [editingBlock, setEditingBlock] = useState<TextBlock | null>(null)
+  const [focusEditor, setFocusEditor] = useState(0)
 
   // Сохраняем документы в localStorage
   useEffect(() => {
@@ -108,7 +109,22 @@ function App() {
     setCurrentContent(newDoc.content)
   }
 
-  const handleSelectDocument = (document: Document) => {
+  const handleSelectDocument = (document: Document, shouldFocus = false) => {
+    // Если это тот же документ и нужно фокусироваться, но мы редактируем блок
+    if (activeDocument?.id === document.id && shouldFocus && editingBlock) {
+      // Переключаемся с блока на документ
+      setEditingBlock(null)
+      setCurrentContent(document.content)
+      setFocusEditor(prev => prev + 1)
+      return
+    }
+
+    // Если это тот же документ и нужно фокусироваться, и мы уже на документе
+    if (activeDocument?.id === document.id && shouldFocus && !editingBlock) {
+      setFocusEditor(prev => prev + 1)
+      return
+    }
+
     // Сохраняем текущий документ перед переключением, только если контент изменился
     if (activeDocument && !editingBlock && currentContent !== activeDocument.content) {
       const updatedDocument = {
@@ -231,6 +247,7 @@ function App() {
         <SimpleEditor
           initialContent={editingBlock?.content || activeDocument?.content || '<p>Выберите документ или создайте новый</p>'}
           onContentChange={handleContentChange}
+          onFocusRequest={focusEditor > 0 ? () => setFocusEditor(0) : undefined}
         />
       </div>
       <Resizer
@@ -256,6 +273,7 @@ function App() {
             onCreateDocument={handleCreateDocument}
             onDeleteDocument={handleDeleteDocument}
             onRenameDocument={handleRenameDocument}
+            editingBlock={editingBlock}
           />
         </div>
       </div>

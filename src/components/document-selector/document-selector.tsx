@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import type { Document } from '@/types/document'
 import './document-selector.css'
 
 interface DocumentSelectorProps {
 	documents: Document[]
 	activeDocumentId: string | null
-	onSelectDocument: (document: Document) => void
+	onSelectDocument: (document: Document, shouldFocus?: boolean) => void
 	onCreateDocument: () => void
 	onDeleteDocument: (id: string) => void
 	onRenameDocument: (id: string, newTitle: string) => void
@@ -22,36 +22,70 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 	const [editingId, setEditingId] = useState<string | null>(null)
 	const [editTitle, setEditTitle] = useState('')
 	const [hoveredId, setHoveredId] = useState<string | null>(null)
+	const [clickedId, setClickedId] = useState<string | null>(null)
 
-	const handleStartEdit = (doc: Document) => {
+	const handleStartEdit = useCallback((doc: Document) => {
 		setEditingId(doc.id)
 		setEditTitle(doc.title)
-	}
+	}, [])
 
-	const handleSaveEdit = () => {
+	const handleSaveEdit = useCallback(() => {
 		if (editingId && editTitle.trim()) {
 			onRenameDocument(editingId, editTitle.trim())
 		}
 		setEditingId(null)
 		setEditTitle('')
-	}
+	}, [editingId, editTitle, onRenameDocument])
 
-	const handleCancelEdit = () => {
+	const handleCancelEdit = useCallback(() => {
 		setEditingId(null)
 		setEditTitle('')
-	}
+	}, [])
 
-	const handleDelete = (doc: Document) => {
+	const handleDelete = useCallback((doc: Document) => {
 		if (window.confirm(`Вы уверены, что хотите удалить документ "${doc.title}"? Все связанные блоки также будут удалены.`)) {
 			onDeleteDocument(doc.id)
 		}
-	}
+	}, [onDeleteDocument])
+
+	const handleDocumentClick = useCallback((doc: Document, e: React.MouseEvent) => {
+		if (
+			e.target instanceof HTMLElement &&
+			(e.target.closest('.document-actions') || e.target.closest('.document-title-input'))
+		) {
+			return
+		}
+
+		setClickedId(doc.id)
+		// Добавляем небольшую задержку для визуальной обратной связи
+		setTimeout(() => {
+			// Если это активный документ, фокусируемся на редакторе
+			const shouldFocus = activeDocumentId === doc.id
+			onSelectDocument(doc, shouldFocus)
+			setClickedId(null)
+		}, 100)
+	}, [activeDocumentId, onSelectDocument])
+
+	const handleDocumentKeyDown = useCallback((doc: Document, e: React.KeyboardEvent) => {
+		if ((e.key === 'Enter' || e.key === ' ') && editingId !== doc.id) {
+			e.preventDefault()
+
+			setClickedId(doc.id)
+			// Добавляем небольшую задержку для визуальной обратной связи
+			setTimeout(() => {
+				// Если это активный документ, фокусируемся на редакторе
+				const shouldFocus = activeDocumentId === doc.id
+				onSelectDocument(doc, shouldFocus)
+				setClickedId(null)
+			}, 100)
+		}
+	}, [activeDocumentId, onSelectDocument, editingId])
 
 	return (
 		<div className="document-selector">
 			<div className="document-selector-header">
 				<h3>Документы</h3>
-				<button 
+				<button
 					className="create-doc-button"
 					onClick={onCreateDocument}
 					title="Создать новый документ"
@@ -63,26 +97,13 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 			<div className="documents-list">
 				{documents.length === 0 ? null : (
 					documents.map(doc => (
-						<div 
+						<div
 							key={doc.id}
-							className={`document-item ${activeDocumentId === doc.id ? 'active' : ''}`}
-							onClick={(e) => {
-								// Не реагировать на клик по кнопкам и инпуту
-								if (
-									e.target instanceof HTMLElement &&
-									(e.target.closest('.document-actions') || e.target.closest('.document-title-input'))
-								) {
-									return
-								}
-								onSelectDocument(doc)
-							}}
+							className={`document-item ${activeDocumentId === doc.id ? 'active' : ''} ${clickedId === doc.id ? 'clicking' : ''}`}
+							onClick={(e) => handleDocumentClick(doc, e)}
 							role="button"
 							tabIndex={0}
-							onKeyDown={(e) => {
-								if ((e.key === 'Enter' || e.key === ' ') && editingId !== doc.id) {
-									onSelectDocument(doc)
-								}
-							}}
+							onKeyDown={(e) => handleDocumentKeyDown(doc, e)}
 							onMouseEnter={() => setHoveredId(doc.id)}
 							onMouseLeave={() => setHoveredId(null)}
 						>
@@ -100,14 +121,14 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 										autoFocus
 									/>
 									<div className="edit-actions">
-										<button 
+										<button
 											className="save-edit-button"
 											onClick={handleSaveEdit}
 											title="Сохранить"
 										>
 											<CheckIcon />
 										</button>
-										<button 
+										<button
 											className="cancel-edit-button"
 											onClick={handleCancelEdit}
 											title="Отменить"
@@ -118,23 +139,23 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 								</div>
 							) : (
 								<div className="document-content">
-									<div 
+									<div
 										className="document-title"
-										// hover только на тексте, но клик теперь на всём блоке
+									// hover только на тексте, но клик теперь на всём блоке
 									>
 										{doc.title}
 									</div>
 									<div className="document-actions">
 										{activeDocumentId === doc.id && hoveredId === doc.id && (
 											<>
-												<button 
+												<button
 													className="edit-doc-button"
 													onClick={() => handleStartEdit(doc)}
 													title="Переименовать"
 												>
 													<EditIcon />
 												</button>
-												<button 
+												<button
 													className="delete-doc-button"
 													onClick={() => handleDelete(doc)}
 													title="Удалить"

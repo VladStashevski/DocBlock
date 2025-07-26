@@ -11,6 +11,8 @@ import { Highlight } from "@tiptap/extension-highlight"
 import { Subscript } from "@tiptap/extension-subscript"
 import { Superscript } from "@tiptap/extension-superscript"
 import { Selection } from "@tiptap/extensions"
+import { TextSelection } from "prosemirror-state"
+import { EditorView } from "prosemirror-view"
 
 // --- UI Primitives ---
 import { Button } from "@/components/tiptap-ui-primitive/button"
@@ -324,11 +326,13 @@ const MobileToolbarContent = ({
 interface SimpleEditorProps {
   initialContent?: string
   onContentChange?: (content: string) => void
+  onFocusRequest?: () => void
 }
 
 export function SimpleEditor({ 
   initialContent,
-  onContentChange 
+  onContentChange,
+  onFocusRequest
 }: SimpleEditorProps = {}) {
   const isMobile = useIsMobile()
   const windowSize = useWindowSize()
@@ -347,6 +351,66 @@ export function SimpleEditor({
         autocapitalize: "off",
         "aria-label": "Main content area, start typing to enter text.",
         class: "simple-editor",
+      },
+      handleDrop: (view: EditorView, event: DragEvent) => {
+        try {
+          if (!event.dataTransfer) return false
+          
+          const jsonData = event.dataTransfer.getData('application/json')
+          if (jsonData) {
+            const block = JSON.parse(jsonData)
+            if (block.content) {
+              const { tr } = view.state
+              const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
+              
+              // Проверяем валидность позиции
+              if (pos === undefined || pos < 0 || pos > view.state.doc.content.size) {
+                return false
+              }
+
+              // Получаем текстовое содержимое блока
+              const tempDiv = document.createElement('div')
+              tempDiv.innerHTML = block.content
+              const textContent = tempDiv.textContent || tempDiv.innerText || ''
+              
+              if (!textContent.trim()) return false
+              
+              const contentToInsert = textContent.trim()
+              
+              // Проверяем, есть ли выделенный текст
+              const { selection } = view.state
+              const hasSelection = !selection.empty
+              
+              if (hasSelection) {
+                // Если есть выделение, заменяем его содержимым блока
+                tr.replaceWith(selection.from, selection.to, view.state.schema.text(contentToInsert))
+                view.dispatch(tr)
+                
+                // Устанавливаем курсор после замененного контента
+                const newPos = selection.from + contentToInsert.length
+                const newSelection = TextSelection.create(view.state.doc, newPos)
+                view.dispatch(view.state.tr.setSelection(newSelection))
+              } else {
+                // Если выделения нет, вставляем в позицию курсора
+                tr.insertText(contentToInsert, pos)
+                view.dispatch(tr)
+                
+                // Устанавливаем курсор после вставленного контента
+                const newPos = pos + contentToInsert.length
+                const newSelection = TextSelection.create(view.state.doc, newPos)
+                view.dispatch(view.state.tr.setSelection(newSelection))
+              }
+              
+              // Фокусируем редактор
+              view.focus()
+              return true
+            }
+          }
+          return false
+        } catch (error) {
+          console.error('Error handling drop:', error)
+          return false
+        }
       },
     },
     extensions: [
@@ -403,6 +467,13 @@ export function SimpleEditor({
       }
     }
   }, [editor, initialContent])
+
+  // Фокусируем редактор при запросе
+  React.useEffect(() => {
+    if (onFocusRequest && editor) {
+      editor.commands.focus()
+    }
+  }, [onFocusRequest, editor])
 
   return (
     <div className="simple-editor-wrapper">

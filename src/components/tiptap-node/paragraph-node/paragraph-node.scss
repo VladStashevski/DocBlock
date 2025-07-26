@@ -34,11 +34,95 @@
   caret-color: var(--tt-cursor-color);
 
   // Paragraph spacing
-  p:not(:first-child) {
+  p {
     font-size: 1rem;
     line-height: 1.6;
     font-weight: normal;
-    margin-top: 20px;
+    margin: 0;
+    
+    // Добавляем отступ только между соседними параграфами
+    + p {
+      margin-top: 16px;
+    }
+    
+    // Убираем отступ после заголовков
+    h1 + &,
+    h2 + &,
+    h3 + &,
+    h4 + &,
+    h5 + &,
+    h6 + & {
+      margin-top: 12px;
+    }
+    
+    // Убираем отступ перед списками
+    + ul,
+    + ol {
+      margin-top: 12px;
+    }
+  }
+
+  // Общие правила для всех блочных элементов
+  > * {
+    &:first-child {
+      margin-top: 0 !important;
+    }
+    
+    &:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  // Улучшенные отступы для заголовков
+  h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+    
+    &:not(:first-child) {
+      margin-top: 32px;
+    }
+    
+    + * {
+      margin-top: 12px !important;
+    }
+  }
+
+  // Отступы для списков
+  ul, ol {
+    margin: 0;
+    
+    &:not(:first-child) {
+      margin-top: 16px;
+    }
+    
+    + p {
+      margin-top: 16px !important;
+    }
+  }
+
+  // Отступы для цитат
+  blockquote {
+    margin: 0;
+    
+    &:not(:first-child) {
+      margin-top: 24px;
+    }
+    
+    + * {
+      margin-top: 16px !important;
+    }
+  }
+
+  // Отступы для кодовых блоков
+  pre {
+    margin: 0;
+    
+    &:not(:first-child) {
+      margin-top: 20px;
+    }
+    
+    + * {
+      margin-top: 16px !important;
+    }
   }
 
   // Selection styles
