@@ -76,6 +76,9 @@
   .tiptap-button-dropdown-arrows,
   .tiptap-button-dropdown-small {
     flex-shrink: 0;
+    transition-property: color;
+    transition-duration: var(--tt-transition-duration-default);
+    transition-timing-function: var(--tt-transition-easing-default);
   }
 
   /* standard icon, what is used */

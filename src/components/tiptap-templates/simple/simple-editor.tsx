@@ -58,6 +58,7 @@ import { UndoRedoButton } from "@/components/tiptap-ui/undo-redo-button"
 import { ArrowLeftIcon } from "@/components/tiptap-icons/arrow-left-icon"
 import { HighlighterIcon } from "@/components/tiptap-icons/highlighter-icon"
 import { LinkIcon } from "@/components/tiptap-icons/link-icon"
+import { DownloadIcon } from "@/components/tiptap-icons/download-icon"
 
 // --- Hooks ---
 import { useIsMobile } from "@/hooks/use-mobile"
@@ -287,7 +288,7 @@ const MainToolbarContent = ({
 
       <ToolbarGroup>
         <Button onClick={() => exportToWord(editor)} title="Экспорт в Word">
-          <LinkIcon className="tiptap-button-icon" /> Word
+          <DownloadIcon className="tiptap-button-icon" /> Word
         </Button>
       </ToolbarGroup>
     </>
@@ -329,7 +330,7 @@ interface SimpleEditorProps {
   onFocusRequest?: () => void
 }
 
-export function SimpleEditor({ 
+export function SimpleEditor({
   initialContent,
   onContentChange,
   onFocusRequest
@@ -355,14 +356,14 @@ export function SimpleEditor({
       handleDrop: (view: EditorView, event: DragEvent) => {
         try {
           if (!event.dataTransfer) return false
-          
+
           const jsonData = event.dataTransfer.getData('application/json')
           if (jsonData) {
             const block = JSON.parse(jsonData)
             if (block.content) {
               const { tr } = view.state
               const pos = view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
-              
+
               // Проверяем валидность позиции
               if (pos === undefined || pos < 0 || pos > view.state.doc.content.size) {
                 return false
@@ -372,20 +373,20 @@ export function SimpleEditor({
               const tempDiv = document.createElement('div')
               tempDiv.innerHTML = block.content
               const textContent = tempDiv.textContent || tempDiv.innerText || ''
-              
+
               if (!textContent.trim()) return false
-              
+
               const contentToInsert = textContent.trim()
-              
+
               // Проверяем, есть ли выделенный текст
               const { selection } = view.state
               const hasSelection = !selection.empty
-              
+
               if (hasSelection) {
                 // Если есть выделение, заменяем его содержимым блока
                 tr.replaceWith(selection.from, selection.to, view.state.schema.text(contentToInsert))
                 view.dispatch(tr)
-                
+
                 // Устанавливаем курсор после замененного контента
                 const newPos = selection.from + contentToInsert.length
                 const newSelection = TextSelection.create(view.state.doc, newPos)
@@ -394,13 +395,13 @@ export function SimpleEditor({
                 // Если выделения нет, вставляем в позицию курсора
                 tr.insertText(contentToInsert, pos)
                 view.dispatch(tr)
-                
+
                 // Устанавливаем курсор после вставленного контента
                 const newPos = pos + contentToInsert.length
                 const newSelection = TextSelection.create(view.state.doc, newPos)
                 view.dispatch(view.state.tr.setSelection(newSelection))
               }
-              
+
               // Фокусируем редактор
               view.focus()
               return true
@@ -483,8 +484,8 @@ export function SimpleEditor({
           style={
             isMobile
               ? {
-                  bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
-                }
+                bottom: `calc(100% - ${windowSize.height - bodyRect.y}px)`,
+              }
               : {}
           }
         >
