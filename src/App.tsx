@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { SimpleEditor } from '@/components/tiptap-templates/simple/simple-editor'
 import { Resizer } from '@/components/resizer/resizer'
 import { Sidebar } from '@/components/sidebar/sidebar'
+import { DesktopOnlyMessage } from '@/components/desktop-only-message/desktop-only-message'
+import { useIsMobile } from '@/hooks/use-mobile'
 import type { Document } from './types/document'
 import type { TextBlock } from './types/text-block'
 import './App.css'
@@ -13,6 +15,8 @@ const DEFAULT_SIDEBAR_WIDTH = 320
 const BLOCKS_KEY = 'text-blocks'
 
 function App() {
+  const isMobile = useIsMobile(1024) // Используем 1024px как минимальную ширину для десктопа
+  
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     const saved = localStorage.getItem(SIDEBAR_WIDTH_KEY)
     return saved ? parseInt(saved, 10) : DEFAULT_SIDEBAR_WIDTH
@@ -239,6 +243,11 @@ function App() {
       ))
       setActiveDocument(updatedDocument)
     }
+  }
+
+  // Показываем сообщение для мобильных устройств и планшетов
+  if (isMobile) {
+    return <DesktopOnlyMessage />
   }
 
   return (
