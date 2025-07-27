@@ -382,17 +382,44 @@ export function SimpleEditor({
               const { selection } = view.state
               const hasSelection = !selection.empty
 
-              if (hasSelection) {
-                // Если есть выделение, заменяем его содержимым блока
-                tr.replaceWith(selection.from, selection.to, view.state.schema.text(contentToInsert))
-                view.dispatch(tr)
+              console.log('Drop debug:', {
+                pos,
+                hasSelection,
+                selectionFrom: selection.from,
+                selectionTo: selection.to,
+                contentToInsert
+              })
 
-                // Устанавливаем курсор после замененного контента
-                const newPos = selection.from + contentToInsert.length
-                const newSelection = TextSelection.create(view.state.doc, newPos)
-                view.dispatch(view.state.tr.setSelection(newSelection))
+              if (hasSelection) {
+                // Проверяем, попадает ли позиция drop строго внутри выделенного текста
+                const isDropOnSelection = pos > selection.from && pos < selection.to
+                
+                console.log('Drop on selection:', isDropOnSelection)
+                
+                if (isDropOnSelection) {
+                  // Если drop происходит на выделенном тексте, заменяем его содержимым блока
+                  console.log('Replacing selected text with block content')
+                  tr.replaceWith(selection.from, selection.to, view.state.schema.text(contentToInsert))
+                  view.dispatch(tr)
+
+                  // Устанавливаем курсор после замененного контента
+                  const newPos = selection.from + contentToInsert.length
+                  const newSelection = TextSelection.create(view.state.doc, newPos)
+                  view.dispatch(view.state.tr.setSelection(newSelection))
+                } else {
+                  // Если drop происходит не на выделенном тексте, просто вставляем в позицию drop
+                  console.log('Inserting at drop position, not replacing selection')
+                  tr.insertText(contentToInsert, pos)
+                  view.dispatch(tr)
+
+                  // Устанавливаем курсор после вставленного контента
+                  const newPos = pos + contentToInsert.length
+                  const newSelection = TextSelection.create(view.state.doc, newPos)
+                  view.dispatch(view.state.tr.setSelection(newSelection))
+                }
               } else {
                 // Если выделения нет, вставляем в позицию курсора
+                console.log('No selection, inserting at drop position')
                 tr.insertText(contentToInsert, pos)
                 view.dispatch(tr)
 
