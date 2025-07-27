@@ -114,7 +114,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       dragElement.style.opacity = '0.95'
       dragElement.style.pointerEvents = 'none' // Предотвращаем взаимодействие с элементом
       dragElement.style.transition = 'transform 0.2s ease, opacity 0.2s ease'
-      
+
       // Добавляем эффект сжатия если блок активен и на него наводят
       if (editingBlock?.id === block.id && hoveredActiveId === block.id) {
         dragElement.style.transform = 'scale(0.85)'
@@ -225,6 +225,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               onKeyDown={(e) => {
                 if ((e.key === 'Enter' || e.key === ' ') && editingId !== block.id) {
                   e.preventDefault()
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   handleBlockClick(block, e as any)
                 }
               }}

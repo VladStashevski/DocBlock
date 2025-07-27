@@ -67,6 +67,7 @@ import { useCursorVisibility } from "@/hooks/use-cursor-visibility"
 
 // --- Components ---
 import { ThemeToggle } from "@/components/tiptap-templates/simple/theme-toggle"
+import { ReplacementTooltip } from "@/components/replacement-tooltip/replacement-tooltip"
 
 // --- Lib ---
 import { handleImageUpload, MAX_FILE_SIZE } from "@/lib/tiptap-utils"
@@ -341,6 +342,11 @@ export function SimpleEditor({
     "main" | "highlighter" | "link"
   >("main")
   const toolbarRef = React.useRef<HTMLDivElement>(null)
+  
+  // Состояние для tooltip замены текста
+  const [showReplacementTooltip, setShowReplacementTooltip] = React.useState(false)
+  const [tooltipPosition, setTooltipPosition] = React.useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = React.useState(false)
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -353,6 +359,7 @@ export function SimpleEditor({
         "aria-label": "Main content area, start typing to enter text.",
         class: "simple-editor",
       },
+
       handleDrop: (view: EditorView, event: DragEvent) => {
         try {
           if (!event.dataTransfer) return false
@@ -431,12 +438,23 @@ export function SimpleEditor({
 
               // Фокусируем редактор
               view.focus()
+              
+              // Скрываем tooltip после успешного drop'а
+              setShowReplacementTooltip(false)
+              setIsDragging(false)
               return true
             }
           }
+          
+          // Скрываем tooltip если drop не удался
+          setShowReplacementTooltip(false)
+          setIsDragging(false)
           return false
         } catch (error) {
           console.error('Error handling drop:', error)
+          // Скрываем tooltip при ошибке
+          setShowReplacementTooltip(false)
+          setIsDragging(false)
           return false
         }
       },
@@ -503,6 +521,57 @@ export function SimpleEditor({
     }
   }, [onFocusRequest, editor])
 
+  // Добавляем обработчики drag событий
+  React.useEffect(() => {
+    if (!editor) return
+
+    const editorElement = editor.view.dom
+
+    const handleDragOver = (event: DragEvent) => {
+      try {
+        // Проверяем, есть ли данные блока (по типу данных)
+        const hasBlockData = event.dataTransfer?.types.includes('application/json')
+        
+        if (hasBlockData) {
+          event.preventDefault() // Разрешаем drop
+          
+          const pos = editor.view.posAtCoords({ left: event.clientX, top: event.clientY })?.pos
+          if (pos === undefined) return
+
+          const { selection } = editor.view.state
+          const hasSelection = !selection.empty
+
+          if (hasSelection && pos > selection.from && pos < selection.to) {
+            // Курсор находится над выделенным текстом - показываем tooltip
+            setTooltipPosition({ x: event.clientX, y: event.clientY })
+            setShowReplacementTooltip(true)
+            setIsDragging(true)
+          } else {
+            // Курсор не над выделенным текстом - скрываем tooltip
+            setShowReplacementTooltip(false)
+          }
+        }
+      } catch (error) {
+        console.error('Error handling drag over:', error)
+      }
+    }
+
+    const handleDragLeave = (event: DragEvent) => {
+      // Проверяем, что мы действительно покидаем редактор, а не переходим к дочернему элементу
+      if (!editorElement.contains(event.relatedTarget as Node)) {
+        setShowReplacementTooltip(false)
+      }
+    }
+
+    editorElement.addEventListener('dragover', handleDragOver)
+    editorElement.addEventListener('dragleave', handleDragLeave)
+
+    return () => {
+      editorElement.removeEventListener('dragover', handleDragOver)
+      editorElement.removeEventListener('dragleave', handleDragLeave)
+    }
+  }, [editor])
+
   return (
     <div className="simple-editor-wrapper">
       <EditorContext.Provider value={{ editor }}>
@@ -535,6 +604,13 @@ export function SimpleEditor({
           editor={editor}
           role="presentation"
           className="simple-editor-content"
+        />
+
+        <ReplacementTooltip
+          show={showReplacementTooltip}
+          position={tooltipPosition}
+          onHide={() => setShowReplacementTooltip(false)}
+          isDragging={isDragging}
         />
       </EditorContext.Provider>
     </div>
