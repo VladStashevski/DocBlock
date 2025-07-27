@@ -2,6 +2,8 @@ import React, { useState, useCallback } from 'react'
 import type { Document } from '@/types/document'
 import type { TextBlock } from '@/types/text-block'
 import { DocumentSelector } from '../document-selector/document-selector'
+import { ConfirmationModal } from '../confirmation-modal/confirmation-modal'
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 import './sidebar.css'
 
 type SidebarBlock = TextBlock
@@ -40,6 +42,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [clickedId, setClickedId] = useState<string | null>(null)
   const [hoveredActiveId, setHoveredActiveId] = useState<string | null>(null)
+  
+  const { confirmationState, showConfirmation } = useConfirmationModal()
 
   const handleStartEdit = useCallback((block: SidebarBlock) => {
     setEditingId(block.id)
@@ -59,11 +63,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
     setEditTitle('')
   }, [])
 
-  const handleDelete = useCallback((block: SidebarBlock) => {
-    if (window.confirm(`Вы уверены, что хотите удалить блок "${block.title}"?`)) {
+  const handleDelete = useCallback(async (block: SidebarBlock) => {
+    const confirmed = await showConfirmation({
+      title: 'Удаление блока',
+      message: `Вы уверены, что хотите удалить блок "${block.title}"?`,
+      confirmText: 'Удалить',
+      cancelText: 'Отменить',
+      variant: 'danger'
+    })
+    
+    if (confirmed) {
       onDeleteBlock(block.id)
     }
-  }, [onDeleteBlock])
+  }, [onDeleteBlock, showConfirmation])
 
   const handleBlockClick = useCallback((block: SidebarBlock, e: React.MouseEvent) => {
     if (
@@ -103,7 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       // Создаем элемент для отображения при перетаскивании
       const dragElement = document.createElement('div')
       dragElement.className = 'block-item drag-element'
-      dragElement.style.width = '280px'
+      dragElement.style.width = '200px'
       dragElement.style.background = 'var(--tt-bg-color, #fff)'
       dragElement.style.border = '1px solid var(--tt-border-color, #e5e7eb)'
       dragElement.style.borderRadius = 'var(--tt-radius-md, 8px)'
@@ -133,7 +145,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       title.style.fontSize = '14px'
       title.style.color = 'var(--tt-gray-dark-800, #2c2e33)'
       title.style.flex = '1'
-      title.style.paddingLeft = '30px'
+      title.style.paddingLeft = '15px'
       header.appendChild(title)
 
       const content = document.createElement('div')
@@ -146,13 +158,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       content.style.display = '-webkit-box'
       content.style.webkitLineClamp = '2'
       content.style.webkitBoxOrient = 'vertical'
-      content.style.paddingLeft = '30px'
+      content.style.paddingLeft = '15px'
 
       dragElement.appendChild(header)
       dragElement.appendChild(content)
 
       document.body.appendChild(dragElement)
-      e.dataTransfer.setDragImage(dragElement, 20, 20)
+      e.dataTransfer.setDragImage(dragElement, -20, -30) // Сдвигаем дальше вправо и ближе к курсору по Y
 
       // Удаляем элемент после начала перетаскивания
       requestAnimationFrame(() => {
@@ -309,6 +321,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ))
         )}
       </div>
+      
+      <ConfirmationModal
+        isOpen={confirmationState.isOpen}
+        title={confirmationState.title}
+        message={confirmationState.message}
+        confirmText={confirmationState.confirmText}
+        cancelText={confirmationState.cancelText}
+        variant={confirmationState.variant}
+        onConfirm={confirmationState.onConfirm}
+        onCancel={confirmationState.onCancel}
+      />
     </div>
   )
 }

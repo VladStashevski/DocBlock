@@ -1,5 +1,7 @@
 import React, { useState, useCallback } from 'react'
 import type { Document } from '@/types/document'
+import { ConfirmationModal } from '../confirmation-modal/confirmation-modal'
+import { useConfirmationModal } from '@/hooks/use-confirmation-modal'
 import './document-selector.css'
 
 interface DocumentSelectorProps {
@@ -23,6 +25,8 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 	const [editTitle, setEditTitle] = useState('')
 	const [hoveredId, setHoveredId] = useState<string | null>(null)
 	const [clickedId, setClickedId] = useState<string | null>(null)
+	
+	const { confirmationState, showConfirmation } = useConfirmationModal()
 
 	const handleStartEdit = useCallback((doc: Document) => {
 		setEditingId(doc.id)
@@ -42,11 +46,19 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 		setEditTitle('')
 	}, [])
 
-	const handleDelete = useCallback((doc: Document) => {
-		if (window.confirm(`Вы уверены, что хотите удалить документ "${doc.title}"? Все связанные блоки также будут удалены.`)) {
+	const handleDelete = useCallback(async (doc: Document) => {
+		const confirmed = await showConfirmation({
+			title: 'Удаление документа',
+			message: `Вы уверены, что хотите удалить документ "${doc.title}"? Все связанные блоки также будут удалены.`,
+			confirmText: 'Удалить',
+			cancelText: 'Отменить',
+			variant: 'danger'
+		})
+		
+		if (confirmed) {
 			onDeleteDocument(doc.id)
 		}
-	}, [onDeleteDocument])
+	}, [onDeleteDocument, showConfirmation])
 
 	const handleDocumentClick = useCallback((doc: Document, e: React.MouseEvent) => {
 		if (
@@ -179,6 +191,17 @@ export const DocumentSelector: React.FC<DocumentSelectorProps> = ({
 					))
 				)}
 			</div>
+			
+			<ConfirmationModal
+				isOpen={confirmationState.isOpen}
+				title={confirmationState.title}
+				message={confirmationState.message}
+				confirmText={confirmationState.confirmText}
+				cancelText={confirmationState.cancelText}
+				variant={confirmationState.variant}
+				onConfirm={confirmationState.onConfirm}
+				onCancel={confirmationState.onCancel}
+			/>
 		</div>
 	)
 }
